@@ -3,8 +3,9 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import { VitePWA } from "vite-plugin-pwa";
-
+const base = "/mental-calc/";
 export default defineConfig({
+  base,
   plugins: [
     tailwindcss(),
     viteReact(),
