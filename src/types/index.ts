@@ -17,3 +17,25 @@ export type ModuleType =
 export type QuestionCount = 10 | 15 | 20 | 30 | 50 | 100;
 
 export type ModuleLabel = Record<ModuleType, string>;
+
+// ======== 历史记录类型 ========
+
+export interface HistoryDetail {
+  questionText: string;
+  userAnswer: string;
+  correctAnswer: number;
+  isCorrect: boolean;
+}
+
+export interface HistoryRecord {
+  id?: number;
+  module: ModuleType;
+  questionCount: number;
+  startTime: number;
+  endTime: number;
+  durationSeconds: number;
+  correctCount: number;
+  totalCount: number;
+  details: HistoryDetail[];
+  createdAt: number;
+}
