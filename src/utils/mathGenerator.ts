@@ -1,4 +1,4 @@
-import type { Question, ModuleType } from '@/types';
+import type { Question, ModuleType } from "@/types";
 
 // ======== 工具函数 ========
 
@@ -54,17 +54,29 @@ function generateTwoDigitAddSub(count: number): Question[] {
   return shuffle(questions);
 }
 
-/** 凑整百：生成 x（1~99），计算 y = 100 - x，展示 x + ? = 100（答案是 y） */
+/**
+ * 凑整百（扩展版）
+ * 目标数从 100, 200, 300, ..., 900 中随机选取，
+ * 生成形如 "x + ? = 整百数" 的题目，其中 1 ≤ x ≤ 目标数-1。
+ */
 function generateMakeHundred(count: number): Question[] {
-  // 1~99 共 99 种可能，最多 99 题不重复
-  const pool = shuffle(Array.from({ length: 99 }, (_, i) => i + 1));
-  const selected = pool.slice(0, Math.min(count, 99));
+  // 所有可能的整百目标（100 ~ 900，步长100）
+  const targets = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+  const questions: Question[] = [];
 
-  return selected.map((x, idx) => ({
-    id: idx,
-    text: `${x} + ? = 100`,
-    answer: 100 - x,
-  }));
+  for (let i = 0; i < count; i++) {
+    // 随机选取一个目标整百数
+    const target = targets[Math.floor(Math.random() * targets.length)];
+    // 随机生成 x（1 到 target-1）
+    const x = Math.floor(Math.random() * (target - 1)) + 1;
+    questions.push({
+      id: i,
+      text: `${x} + ? = ${target}`,
+      answer: target - x,
+    });
+  }
+
+  return questions;
 }
 
 /** 三位数加法：两个100~999的数相加 */
@@ -170,13 +182,13 @@ function generateMultiAdd(count: number): Question[] {
     for (let i = 0; i < n; i++) {
       nums.push(randInt(10, 99));
     }
-    const key = nums.join('+');
+    const key = nums.join("+");
     if (set.has(key)) continue;
     set.add(key);
     const answer = nums.reduce((sum, v) => sum + v, 0);
     questions.push({
       id: questions.length,
-      text: `${nums.join(' + ')} = ?`,
+      text: `${nums.join(" + ")} = ?`,
       answer,
     });
   }
@@ -200,7 +212,7 @@ function generateMixedAddSub(count: number): Question[] {
     let running = randInt(20, 99); // 初始值稍大以避免中间变负
     const parts: string[] = [String(running)];
     nums.push(running);
-    ops.push('+'); // 占位
+    ops.push("+"); // 占位
 
     for (let i = 1; i < n; i++) {
       const nextNum = randInt(10, 99);
@@ -208,36 +220,36 @@ function generateMixedAddSub(count: number): Question[] {
 
       if (useAdd) {
         running += nextNum;
-        parts.push('+');
+        parts.push("+");
         parts.push(String(nextNum));
         nums.push(nextNum);
-        ops.push('+');
+        ops.push("+");
       } else {
         // 减法需保证 running - nextNum >= 0
         if (running - nextNum < 0) {
           // 强制换成加法
           running += nextNum;
-          parts.push('+');
+          parts.push("+");
           parts.push(String(nextNum));
           nums.push(nextNum);
-          ops.push('+');
+          ops.push("+");
         } else {
           running -= nextNum;
-          parts.push('-');
+          parts.push("-");
           parts.push(String(nextNum));
           nums.push(nextNum);
-          ops.push('-');
+          ops.push("-");
         }
       }
     }
 
-    const key = parts.join('');
+    const key = parts.join("");
     if (set.has(key)) continue;
     set.add(key);
 
     questions.push({
       id: questions.length,
-      text: `${parts.join(' ')} = ?`,
+      text: `${parts.join(" ")} = ?`,
       answer: running,
     });
   }
@@ -257,7 +269,10 @@ const generators: Record<ModuleType, (count: number) => Question[]> = {
   mixed_add_sub: generateMixedAddSub,
 };
 
-export function generateQuestions(module: ModuleType, count: number): Question[] {
+export function generateQuestions(
+  module: ModuleType,
+  count: number,
+): Question[] {
   const gen = generators[module];
   return gen(count);
 }
