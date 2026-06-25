@@ -569,7 +569,7 @@ export function MathGame() {
                 重新开始
               </Button>
               <Button
-                onClick={() => navigate({ to: "/history" })}
+                onClick={() => navigate({ to: "/mental-calc/history" })}
                 variant="outline"
                 size="lg"
               >

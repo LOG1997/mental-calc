@@ -61,7 +61,9 @@ export function HistoryList() {
                     <th className="px-4 py-3 text-left font-medium">题量</th>
                     <th className="px-4 py-3 text-left font-medium">正确率</th>
                     <th className="px-4 py-3 text-left font-medium">用时</th>
-                    <th className="px-4 py-3 text-left font-medium">完成时间</th>
+                    <th className="px-4 py-3 text-left font-medium">
+                      完成时间
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -71,7 +73,7 @@ export function HistoryList() {
                       className="cursor-pointer border-b transition-colors hover:bg-muted/30"
                       onClick={() =>
                         navigate({
-                          to: "/history/$id",
+                          to: "/mental-calc/history/$id",
                           params: { id: String(r.id) },
                         })
                       }

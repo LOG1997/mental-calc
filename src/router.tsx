@@ -1,4 +1,10 @@
-import { createRootRoute, createRoute, createRouter, Outlet, Link } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  Link,
+} from "@tanstack/react-router";
 import { MathGame } from "@/components/MathGame";
 import { HistoryList } from "@/components/HistoryList";
 import { HistoryDetail } from "@/components/HistoryDetail";
@@ -15,13 +21,13 @@ function RootLayout() {
           </Link>
           <nav className="flex items-center gap-4">
             <Link
-              to="/"
+              to="/mental-calc"
               className="text-sm font-medium transition-colors hover:text-primary [&.active]:text-primary [&.active]:font-semibold"
             >
               练习
             </Link>
             <Link
-              to="/history"
+              to="/mental-calc/history"
               className="text-sm font-medium transition-colors hover:text-primary [&.active]:text-primary [&.active]:font-semibold"
             >
               历史
@@ -42,13 +48,13 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
+  path: "/mental-calc",
   component: MathGame,
 });
 
 const historyRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/history",
+  path: "/mental-calc/history",
   component: HistoryList,
 });
 

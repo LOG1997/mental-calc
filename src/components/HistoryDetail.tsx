@@ -8,7 +8,7 @@ import { MODULE_LABELS } from "@/lib/constants";
 import type { HistoryRecord } from "@/types";
 
 export function HistoryDetail() {
-  const { id } = useParams({ from: "/history/$id" });
+  const { id } = useParams({ from: "/mental-calc/history/$id" });
   const [record, setRecord] = useState<HistoryRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -60,7 +60,7 @@ export function HistoryDetail() {
               该记录可能已被删除，或 ID 无效。
             </p>
             <Link
-              to="/history"
+              to="/mental-calc/history"
               className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
             >
               返回列表
@@ -78,7 +78,7 @@ export function HistoryDetail() {
         variant="ghost"
         size="sm"
         className="mb-4"
-        onClick={() => navigate({ to: "/history" })}
+        onClick={() => navigate({ to: "/mental-calc/history" })}
       >
         <ArrowLeft className="mr-1 h-4 w-4" />
         返回列表
