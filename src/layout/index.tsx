@@ -6,7 +6,7 @@ export default function Layout() {
     return (
         <>
             <Header />
-            <main className="mt-8">
+            <main className="mt-2">
                 <Outlet />
             </main>
             <Toaster />

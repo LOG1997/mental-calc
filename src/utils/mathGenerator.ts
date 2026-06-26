@@ -17,38 +17,102 @@ function shuffle<T>(arr: T[]): T[] {
 
 // ======== 各模块生成函数 ========
 
-/** 两位数加减：两个10~99的数，加减随机，减法确保被减数 >= 减数 */
-function generateTwoDigitAddSub(count: number): Question[] {
+/**
+ * 两位数加减法（根据 seed 参数组合生成指定题型）
+ * @param count 题目数量
+ * @param seed 包含四个布尔标志：carryAdd, noCarryAdd, borrowSub, noBorrowSub
+ * 特别地，当四个参数全部为 false 时，视为生成全部类型（等同于全为 true）
+ */
+function generateTwoDigitAddSub(count: number, seed: any): Question[] {
+    console.log("generateTwoDigitAddSub", seed);
+    const { borrowSub, carryAdd, noBorrowSub, noCarryAdd } = seed;
+
+    // 如果全部为 false，则全部开启（避免返回空集）
+    if (!carryAdd.enable && !noCarryAdd.enable && !borrowSub.enable && !noBorrowSub.enable) {
+        carryAdd.enable = true;
+        noCarryAdd.enable = true;
+        borrowSub.enable = true;
+        noBorrowSub.enable = true;
+    }
+
+    // 收集需要生成的题型
+    const activeTypes: string[] = [];
+    if (carryAdd.enable) activeTypes.push('carryAdd');
+    if (noCarryAdd.enable) activeTypes.push('noCarryAdd');
+    if (borrowSub.enable) activeTypes.push('borrowSub');
+    if (noBorrowSub.enable) activeTypes.push('noBorrowSub');
+
     const set = new Set<string>();
     const questions: Question[] = [];
     let attempts = 0;
+    const maxAttempts = count * 200; // 安全上限
 
-    while (questions.length < count && attempts < count * 20) {
+    while (questions.length < count && attempts < maxAttempts) {
         attempts++;
-        const a = randInt(10, 99);
-        const b = randInt(10, 99);
-        const isAdd = Math.random() < 0.5;
 
-        if (isAdd) {
-            const key = `${a}+${b}`;
-            if (set.has(key)) continue;
-            set.add(key);
-            questions.push({
-                id: questions.length,
-                text: `${a} + ${b} = ?`,
-                answer: a + b,
-            });
-        } else {
-            const [big, small] = a >= b ? [a, b] : [b, a];
-            const key = `${big}-${small}`;
-            if (set.has(key)) continue;
-            set.add(key);
-            questions.push({
-                id: questions.length,
-                text: `${big} - ${small} = ?`,
-                answer: big - small,
-            });
+        // 从激活的题型中随机选一种
+        const type = activeTypes[Math.floor(Math.random() * activeTypes.length)];
+
+        let a = randInt(10, 99);
+        let b = randInt(10, 99);
+        let isValid = false;
+        let key = '';
+        let text = '';
+        let answer = 0;
+
+        // 内层循环：针对当前类型生成符合条件的数字
+        let innerAttempts = 0;
+        while (!isValid && innerAttempts < 100) {
+            innerAttempts++;
+            a = randInt(10, 99);
+            b = randInt(10, 99);
+
+            if (type === 'carryAdd') {
+                if ((a % 10) + (b % 10) >= 10) {
+                    key = `${a}+${b}`;
+                    text = `${a} + ${b} = ?`;
+                    answer = a + b;
+                    isValid = true;
+                }
+            } else if (type === 'noCarryAdd') {
+                if ((a % 10) + (b % 10) < 10) {
+                    key = `${a}+${b}`;
+                    text = `${a} + ${b} = ?`;
+                    answer = a + b;
+                    isValid = true;
+                }
+            } else if (type === 'borrowSub') {
+                const big = Math.max(a, b);
+                const small = Math.min(a, b);
+                if ((big % 10) < (small % 10)) {
+                    key = `${big}-${small}`;
+                    text = `${big} - ${small} = ?`;
+                    answer = big - small;
+                    isValid = true;
+                }
+            } else if (type === 'noBorrowSub') {
+                const big = Math.max(a, b);
+                const small = Math.min(a, b);
+                if ((big % 10) >= (small % 10)) {
+                    key = `${big}-${small}`;
+                    text = `${big} - ${small} = ?`;
+                    answer = big - small;
+                    isValid = true;
+                }
+            }
         }
+
+        if (!isValid) continue; // 内层未找到则跳过
+
+        // 全局去重
+        if (set.has(key)) continue;
+        set.add(key);
+
+        questions.push({
+            id: questions.length,
+            text: text,
+            answer: answer,
+        });
     }
 
     return shuffle(questions);
@@ -259,7 +323,7 @@ function generateMixedAddSub(count: number): Question[] {
 
 // ======== 统一导出 ========
 
-const generators: Record<ModuleType, (count: number) => Question[]> = {
+const generators: Record<ModuleType, (count: number, seed: any) => Question[]> = {
     two_digit_add_sub: generateTwoDigitAddSub,
     make_hundred: generateMakeHundred,
     three_digit_add: generateThreeDigitAdd,
@@ -272,7 +336,8 @@ const generators: Record<ModuleType, (count: number) => Question[]> = {
 export function generateQuestions(
     module: ModuleType,
     count: number,
+    seed?: any,
 ): Question[] {
     const gen = generators[module];
-    return gen(count);
+    return gen(count, seed);
 }
