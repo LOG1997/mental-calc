@@ -1,11 +1,23 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { RouterProvider } from "@tanstack/react-router";
-import { router } from "./router";
-import "./index.css";
+import ReactDOM from 'react-dom/client'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-);
+const router = createRouter({
+    routeTree,
+    defaultPreload: 'intent',
+    scrollRestoration: true,
+    basepath: '/mental-calc',
+})
+
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: typeof router
+    }
+}
+
+const rootElement = document.getElementById('app')!
+
+if (!rootElement.innerHTML) {
+    const root = ReactDOM.createRoot(rootElement)
+    root.render(<RouterProvider router={router} />)
+}

@@ -1,4 +1,2 @@
 allowBuilds:
-  esbuild: false
-minimumReleaseAgeExclude:
-  - '@types/node@26.0.1'
+  unrs-resolver: false
