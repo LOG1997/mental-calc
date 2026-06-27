@@ -1,11 +1,15 @@
 import { Toaster } from "@/components/ui/sonner"
 import { Outlet } from '@tanstack/react-router'
 import Header from './Header';
+import { usePageStateStore } from '@/stores'
 
 export default function Layout() {
+    const pageStateStore = usePageStateStore()
     return (
         <>
-            <Header />
+            {
+                !pageStateStore.practiceConfig.isStarted && <Header />
+            }
             <main className="mt-2">
                 <Outlet />
             </main>

@@ -7,7 +7,7 @@ import { db } from "@/utils/db";
 import type { ModuleType, QuestionCount, Question } from "@/types";
 import { generateQuestions } from "@/utils/mathGenerator";
 import { ToolBar } from './parts/-ToolBar'
-import { useGlobalSettingStore, practiceStore } from '@/stores'
+import { useGlobalSettingStore, practiceStore, usePageStateStore } from '@/stores'
 import { formatTime } from '@/utils/format'
 import { ScoreDialog } from '@/routes/common-units/-ScoreDialog'
 import Numpad from './parts/-Keyboard'
@@ -17,6 +17,7 @@ import { CircleX, CircleCheck } from 'lucide-react'
 
 export const Route = createFileRoute('/practice/')({
     component: RouteComponent,
+
 })
 
 // ======== 常量 ========
@@ -29,6 +30,7 @@ const HOLD_TICK_INCREMENT = 100 / (HOLD_DURATION_MS / HOLD_TICK_MS);
 function RouteComponent() {
     const isMobile = getIsMobile()
     const globalSettingStore = useGlobalSettingStore()
+    const pageStateStore = usePageStateStore()
     const { module: currentModule, questionCount } = globalSettingStore.config
     const currentPracticeStore = practiceStore[currentModule]()
     const { config: seedConfig } = currentPracticeStore
@@ -150,6 +152,11 @@ function RouteComponent() {
             const now = Date.now();
             questions[currentIndex].startTimestamp = now;
         }
+        // if (isStarted) {
+        pageStateStore.setPracticeConfig({
+            isStarted,
+        })
+        // }
     }, [currentQuestion, isStarted, isFinished]);
 
     // ======== 键盘事件处理 ========
@@ -319,7 +326,11 @@ function RouteComponent() {
             {/* ======== 主内容区 ======== */}
             <main className="mx-auto max-w-3xl px-4 py-2">
                 {/* 选择器工具栏 */}
-                <ToolBar />
+                {
+                    !isStarted && (
+                        <ToolBar />
+                    )
+                }
 
                 {/* 答题卡片 */}
                 <Card className="relative overflow-hidden h-1/3">
