@@ -58,7 +58,7 @@ function generateTwoDigitAddSub(count: number, seed: any): Question[] {
         let isValid = false;
         let key = '';
         let text = '';
-        let answer = 0;
+        let correctAnswer = 0;
 
         // 内层循环：针对当前类型生成符合条件的数字
         let innerAttempts = 0;
@@ -71,14 +71,14 @@ function generateTwoDigitAddSub(count: number, seed: any): Question[] {
                 if ((a % 10) + (b % 10) >= 10) {
                     key = `${a}+${b}`;
                     text = `${a} + ${b} = ?`;
-                    answer = a + b;
+                    correctAnswer = a + b;
                     isValid = true;
                 }
             } else if (type === 'noCarryAdd') {
                 if ((a % 10) + (b % 10) < 10) {
                     key = `${a}+${b}`;
                     text = `${a} + ${b} = ?`;
-                    answer = a + b;
+                    correctAnswer = a + b;
                     isValid = true;
                 }
             } else if (type === 'borrowSub') {
@@ -87,7 +87,7 @@ function generateTwoDigitAddSub(count: number, seed: any): Question[] {
                 if ((big % 10) < (small % 10)) {
                     key = `${big}-${small}`;
                     text = `${big} - ${small} = ?`;
-                    answer = big - small;
+                    correctAnswer = big - small;
                     isValid = true;
                 }
             } else if (type === 'noBorrowSub') {
@@ -96,7 +96,7 @@ function generateTwoDigitAddSub(count: number, seed: any): Question[] {
                 if ((big % 10) >= (small % 10)) {
                     key = `${big}-${small}`;
                     text = `${big} - ${small} = ?`;
-                    answer = big - small;
+                    correctAnswer = big - small;
                     isValid = true;
                 }
             }
@@ -111,7 +111,10 @@ function generateTwoDigitAddSub(count: number, seed: any): Question[] {
         questions.push({
             id: questions.length,
             text: text,
-            answer: answer,
+            correctAnswer: correctAnswer,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
         });
     }
 
@@ -136,7 +139,10 @@ function generateMakeHundred(count: number): Question[] {
         questions.push({
             id: i,
             text: `${x} + ? = ${target}`,
-            answer: target - x,
+            correctAnswer: target - x,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
         });
     }
 
@@ -159,7 +165,10 @@ function generateThreeDigitAdd(count: number): Question[] {
         questions.push({
             id: questions.length,
             text: `${a} + ${b} = ?`,
-            answer: a + b,
+            correctAnswer: a + b,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
         });
     }
 
@@ -185,7 +194,10 @@ function generateThreeDigitSub(count: number): Question[] {
         questions.push({
             id: questions.length,
             text: `${big} - ${small} = ?`,
-            answer: big - small,
+            correctAnswer: big - small,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
         });
     }
 
@@ -214,7 +226,10 @@ function generateThreeDigitMixed(count: number): Question[] {
             questions.push({
                 id: questions.length,
                 text: `${a} + ${b} - ${c} = ?`,
-                answer: a + b - c,
+                correctAnswer: a + b - c,
+                durationSeconds: 0,
+                startTimestamp: 0,
+                endTimestamp: 0,
             });
         } else {
             // a - b + c, 需保证 a >= b
@@ -225,7 +240,10 @@ function generateThreeDigitMixed(count: number): Question[] {
             questions.push({
                 id: questions.length,
                 text: `${a} - ${b} + ${c} = ?`,
-                answer: a - b + c,
+                correctAnswer: a - b + c,
+                durationSeconds: 0,
+                startTimestamp: 0,
+                endTimestamp: 0,
             });
         }
     }
@@ -249,11 +267,14 @@ function generateMultiAdd(count: number): Question[] {
         const key = nums.join("+");
         if (set.has(key)) continue;
         set.add(key);
-        const answer = nums.reduce((sum, v) => sum + v, 0);
+        const correctAnswer = nums.reduce((sum, v) => sum + v, 0);
         questions.push({
             id: questions.length,
             text: `${nums.join(" + ")} = ?`,
-            answer,
+            correctAnswer,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
         });
     }
 
@@ -314,7 +335,10 @@ function generateMixedAddSub(count: number): Question[] {
         questions.push({
             id: questions.length,
             text: `${parts.join(" ")} = ?`,
-            answer: running,
+            correctAnswer: running,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
         });
     }
 

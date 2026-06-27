@@ -1,19 +1,22 @@
-import React from 'react'
 import { Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useNavigate } from "@tanstack/react-router"
-import type { Question } from "@/types"
 
-export function ScoreDialog(props: { visible: boolean, finalElapsed: string, correctCount: number, totalQuestions: number, questions: Question[], answers: (string | undefined)[], handleRestart: () => void }) {
+export function ScoreDialog(props: { visible: boolean, setVisible: (visible: boolean) => void, finalElapsed: string, correctCount: number, totalQuestions: number, questions: any[], answers: (string | undefined)[], handleRestart?: () => void }) {
     const navigate = useNavigate()
-    const { visible, finalElapsed, correctCount, totalQuestions, questions, answers, handleRestart } = props
+    const { visible, setVisible, finalElapsed, correctCount, totalQuestions, questions, answers, handleRestart } = props
+    const handleClose = (e: any) => {
+        e.preventDefault()
+        setVisible(false)
+    }
     return (
         <Dialog open={visible} onOpenChange={() => { }}>
             <DialogContent
-                className="max-h-[85vh] max-w-xl overflow-y-auto"
-                onInteractOutside={(e) => e.preventDefault()}
-                onEscapeKeyDown={(e) => e.preventDefault()}
+                className="max-h-[85vh] overflow-y-auto w-full"
+                onInteractOutside={(e) => handleClose(e)}
+                onEscapeKeyDown={(e) => handleClose(e)}
+                showCloseButton={false}
             >
                 <DialogHeader>
                     <DialogTitle className="text-center text-xl">
@@ -44,7 +47,8 @@ export function ScoreDialog(props: { visible: boolean, finalElapsed: string, cor
                         <div className="max-h-60 space-y-1 overflow-y-auto rounded-lg border">
                             {questions.map((q, i) => {
                                 const userAns = answers[i] || "";
-                                const isCorrect = String(q.answer) === userAns;
+                                const correctAnswer = String(q.correctAnswer);
+                                const isCorrect = String(q.correctAnswer) === userAns;
                                 return (
                                     <div
                                         key={q.id}
@@ -54,22 +58,28 @@ export function ScoreDialog(props: { visible: boolean, finalElapsed: string, cor
                                         <span className="w-6 text-center tabular-nums text-muted-foreground">
                                             {i + 1}
                                         </span>
-                                        <span className="flex-1 font-mono">{q.text}</span>
+                                        <span className="flex-1 flex-nowrap text-nowrap font-mono">{q.text}</span>
                                         <span
-                                            className={`w-20 text-right font-mono ${isCorrect ? "text-green-600" : "text-red-600"
+                                            className={`w-8 text-right font-mono ${isCorrect ? "text-green-600" : "text-red-600"
+                                                }`}
+                                        >
+                                            {correctAnswer || "—"}
+                                        </span>
+                                        <span
+                                            className={`w-6 text-right font-mono ${isCorrect ? "text-green-600" : "text-red-600"
                                                 }`}
                                         >
                                             {userAns || "—"}
                                         </span>
-                                        <span className="w-20 text-right font-mono text-muted-foreground">
-                                            {q.answer}
-                                        </span>
-                                        <span className="w-6">
+                                        <span className="w-2">
                                             {isCorrect ? (
                                                 <Check className="h-4 w-4 text-green-500" />
                                             ) : (
                                                 <X className="h-4 w-4 text-red-500" />
                                             )}
+                                        </span>
+                                        <span className="w-12">
+                                            <span className="text-muted-foreground">{q.durationSeconds} 秒</span>
                                         </span>
                                     </div>
                                 );
@@ -79,9 +89,19 @@ export function ScoreDialog(props: { visible: boolean, finalElapsed: string, cor
 
                     {/* 操作按钮 */}
                     <div className="flex justify-center gap-3 pt-2">
-                        <Button onClick={handleRestart} size="lg">
-                            重新开始
-                        </Button>
+
+                        {
+                            handleRestart ? (
+                                <Button onClick={handleRestart} size="lg">
+                                    重新开始
+                                </Button>
+                            ) : (
+                                <Button onClick={handleClose} size="lg">
+                                    关闭
+                                </Button>
+                            )
+                        }
+
                         <Button
                             onClick={() => navigate({ to: "/history" })}
                             variant="outline"

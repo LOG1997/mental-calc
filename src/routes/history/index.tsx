@@ -1,9 +1,10 @@
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/utils/db";
 import { MODULE_LABELS } from "@/constants/constant";
 import type { HistoryRecord } from "@/types";
+import { ScoreDialog } from '@/routes/common-units/-ScoreDialog'
 
 export const Route = createFileRoute('/history/')({
     component: RouteComponent,
@@ -12,8 +13,32 @@ export const Route = createFileRoute('/history/')({
 function RouteComponent() {
     const [records, setRecords] = useState<HistoryRecord[]>([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+    const [visible, setVisible] = useState(false);
+    const [recordDetail, setRecordDetail] = useState({
+        id: 0,
+        finalElapsed: "",
+        correctCount: 0,
+        totalQuestions: 0,
+        questions: [],
+        answers: [],
+    })
 
+    const handleShowDetail = (record: any) => {
+        console.log(record);
+        const res = {
+            id: record.id,
+            finalElapsed: record.durationSeconds,
+            correctCount: record.correctCount,
+            totalQuestions: record.totalCount,
+            questions: record.details.map((d: any) => {
+                d.text = d.questionText;
+                return d;
+            }),
+            answers: record.details.map((d: any) => d.userAnswer),
+        }
+        setRecordDetail(res);
+        setVisible(true);
+    };
     useEffect(() => {
         db.historyRecords
             .orderBy("createdAt")
@@ -76,17 +101,14 @@ function RouteComponent() {
                                             key={r.id}
                                             className="cursor-pointer border-b transition-colors hover:bg-muted/30"
                                             onClick={() =>
-                                                navigate({
-                                                    to: "/history",
-                                                    params: { id: String(r.id) },
-                                                })
+                                                handleShowDetail(r)
                                             }
                                         >
                                             <td className="px-4 py-3 text-muted-foreground">
                                                 {i + 1}
                                             </td>
                                             <td className="px-4 py-3 font-medium">
-                                                {MODULE_LABELS[r.module]}
+                                                {MODULE_LABELS[r.module].name}
                                             </td>
                                             <td className="px-4 py-3">{r.questionCount} 题</td>
                                             <td className="px-4 py-3">
@@ -119,6 +141,15 @@ function RouteComponent() {
                     </CardContent>
                 </Card>
             )}
+            <ScoreDialog
+                visible={visible}
+                setVisible={setVisible}
+                finalElapsed={recordDetail.finalElapsed}
+                correctCount={recordDetail.correctCount}
+                totalQuestions={recordDetail.totalQuestions}
+                questions={recordDetail.questions}
+                answers={recordDetail.answers}
+            />
         </main>
     );
 }

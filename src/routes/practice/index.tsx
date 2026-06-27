@@ -9,9 +9,11 @@ import { generateQuestions } from "@/utils/mathGenerator";
 import { ToolBar } from './parts/-ToolBar'
 import { useGlobalSettingStore, practiceStore } from '@/stores'
 import { formatTime } from '@/utils/format'
-import { ScoreDialog } from './parts/-ScoreDialog'
+import { ScoreDialog } from '@/routes/common-units/-ScoreDialog'
 import Numpad from './parts/-Keyboard'
 import { getIsMobile } from '@/utils/system'
+import { toast } from 'sonner'
+import { CircleX, CircleCheck } from 'lucide-react'
 
 export const Route = createFileRoute('/practice/')({
     component: RouteComponent,
@@ -44,7 +46,6 @@ function RouteComponent() {
     const [endTime, setEndTime] = useState<number | null>(null);
     const [isFinished, setIsFinished] = useState(false);
     const [elapsedRealtime, setElapsedRealtime] = useState(0);
-
     const [amount, setAmount] = useState('')
 
     // ======== Refs ========
@@ -70,7 +71,7 @@ function RouteComponent() {
             }
             // 持久化配置
             hasSavedRef.current = false;
-            setQuestions(generateQuestions(module, count));
+            setQuestions(generateQuestions(module, count, seedConfig));
             setCurrentIndex(0);
             setAnswers([]);
             setIsStarted(false);
@@ -83,6 +84,7 @@ function RouteComponent() {
             startTimeRef.current = null;
             setEndTime(null);
             setElapsedRealtime(0);
+            console.log("重置并重新生成题库");
         },
         [],
     );
@@ -96,79 +98,117 @@ function RouteComponent() {
 
         // 验证：非空且为数字
         if (rawAnswer === "" || !/^\d+$/.test(rawAnswer)) {
-            alert("请输入有效的数字答案");
-            // inputRef.current.value = "";
+            toast.error("请输入有效的数字答案", { position: "top-center" })
             setAmount('')
             inputRef.current.focus();
             return;
         }
-
-        // 记录首次答题时间
-        // if (startTimeRef.current === null) {
-        //   const now = Date.now();
-        //   startTimeRef.current = now;
-        //   setStartTime(now);
-        // }
-
+        // 判断答案是否正确
+        const isCorrect = rawAnswer === currentQuestion.correctAnswer.toString();
+        if (!isCorrect) {
+            toast.error("答案错误", {
+                duration: 2000,
+                icon: <CircleX className='text-red-500 size-4' />,
+                position: "top-center"
+            })
+        }
+        if (isCorrect) {
+            toast.success("答案正确", {
+                duration: 2000,
+                icon: <CircleCheck className='text-green-500 size-4' />,
+                position: "top-center"
+            })
+        }
         // 记录答案
         const newAnswers = [...answers];
         newAnswers[currentIndex] = rawAnswer;
         setAnswers(newAnswers);
 
+        const now = Date.now();
+        questions[currentIndex].endTimestamp = now;
+        questions[currentIndex].durationSeconds = Math.round(
+            100 * ((questions[currentIndex].endTimestamp -
+                questions[currentIndex].startTimestamp) /
+                1000),
+        ) / 100;
         // 判断是否最后一题
         if (currentIndex >= totalQuestions - 1) {
-            const now = Date.now();
             setEndTime(now);
             setIsFinished(true);
         } else {
+
             setCurrentIndex((prev) => prev + 1);
         }
 
         // 清空输入框
         // inputRef.current.value = "";
         setAmount('')
-        console.log('c重置ubmitAnswer', rawAnswer, amount)
     }, [answers, currentIndex, totalQuestions, amount]);
 
+    useEffect(() => {
+        if (isStarted && !isFinished) {
+            const now = Date.now();
+            questions[currentIndex].startTimestamp = now;
+        }
+    }, [currentQuestion, isStarted, isFinished]);
+
     // ======== 键盘事件处理 ========
+
+    const handleLongPressStart = () => {
+        console.log("长按开始", cardRef.current);
+        if (!isStarted && !isFinished) {
+            setIsWaiting(true);
+            holdProgressRef.current = 0;
+            setHoldProgress(0);
+            longPressTriggeredRef.current = false;
+
+            holdTimerRef.current = setInterval(() => {
+                holdProgressRef.current += HOLD_TICK_INCREMENT;
+                const current = Math.min(holdProgressRef.current, 100);
+                setHoldProgress(current);
+
+                if (holdProgressRef.current >= 100) {
+                    if (holdTimerRef.current) {
+                        clearInterval(holdTimerRef.current);
+                        holdTimerRef.current = null;
+                    }
+                    longPressTriggeredRef.current = true;
+                    setHoldProgress(100);
+                    setIsWaiting(false);
+                    setIsStarted(true);
+                    // 记录首次答题时间
+                    if (startTimeRef.current === null) {
+                        const now = Date.now();
+                        startTimeRef.current = now;
+                        console.log("记录首次答题时间:", now);
+                        setStartTime(now);
+                    }
+                }
+            }, HOLD_TICK_MS);
+
+            return;
+        }
+    }
+    const handleLongPressEnd = () => {
+        longPressTriggeredRef.current = false;
+        console.log("长按结束", holdTimerRef, cardRef.current);
+        if (holdTimerRef.current) {
+            clearInterval(holdTimerRef.current);
+            holdTimerRef.current = null;
+            setHoldProgress(0);
+            holdProgressRef.current = 0;
+            setIsWaiting(false);
+        }
+    }
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            console.log("handleKeyDown", e.key)
             if (e.key !== "Enter") return;
             if (e.repeat) return;
 
+            e.preventDefault();
             // 场景一：未开始 → 开始长按计时
-            if (!isStarted && !isFinished) {
-                e.preventDefault();
-                setIsWaiting(true);
-                holdProgressRef.current = 0;
-                setHoldProgress(0);
-                longPressTriggeredRef.current = false;
-
-                holdTimerRef.current = setInterval(() => {
-                    holdProgressRef.current += HOLD_TICK_INCREMENT;
-                    const current = Math.min(holdProgressRef.current, 100);
-                    setHoldProgress(current);
-
-                    if (holdProgressRef.current >= 100) {
-                        if (holdTimerRef.current) {
-                            clearInterval(holdTimerRef.current);
-                            holdTimerRef.current = null;
-                        }
-                        longPressTriggeredRef.current = true;
-                        setHoldProgress(100);
-                        setIsWaiting(false);
-                        setIsStarted(true);
-                        // 记录首次答题时间
-                        if (startTimeRef.current === null) {
-                            const now = Date.now();
-                            startTimeRef.current = now;
-                            setStartTime(now);
-                        }
-                    }
-                }, HOLD_TICK_MS);
-
-                return;
-            }
+            handleLongPressStart();
 
             // 场景二：答题中 → 提交当前答案
             if (isStarted && !isFinished && !longPressTriggeredRef.current) {
@@ -179,82 +219,35 @@ function RouteComponent() {
 
         const handleKeyUp = (e: KeyboardEvent) => {
             if (e.key !== "Enter") return;
-
-            longPressTriggeredRef.current = false;
-
-            if (holdTimerRef.current) {
-                clearInterval(holdTimerRef.current);
-                holdTimerRef.current = null;
-                setHoldProgress(0);
-                holdProgressRef.current = 0;
-                setIsWaiting(false);
-            }
+            handleLongPressEnd()
         };
 
         const handleCardTouchStart = (e: TouchEvent) => {
-            console.log('touchstart', e)
-            if (!isStarted && !isFinished) {
-                e.preventDefault();
-                setIsWaiting(true);
-                holdProgressRef.current = 0;
-                setHoldProgress(0);
-                longPressTriggeredRef.current = false;
-
-                holdTimerRef.current = setInterval(() => {
-                    holdProgressRef.current += HOLD_TICK_INCREMENT;
-                    const current = Math.min(holdProgressRef.current, 100);
-                    setHoldProgress(current);
-
-                    if (holdProgressRef.current >= 100) {
-                        if (holdTimerRef.current) {
-                            clearInterval(holdTimerRef.current);
-                            holdTimerRef.current = null;
-                        }
-                        longPressTriggeredRef.current = true;
-                        setHoldProgress(100);
-                        setIsWaiting(false);
-                        setIsStarted(true);
-                        // 记录首次答题时间
-                        if (startTimeRef.current === null) {
-                            const now = Date.now();
-                            startTimeRef.current = now;
-                            setStartTime(now);
-                        }
-                    }
-                }, HOLD_TICK_MS);
-
-                return;
-            }
+            console.log("handleCardTouchStart")
+            e.preventDefault();
+            handleLongPressStart()
         }
         const handleCardTouchEnd = (e: TouchEvent) => {
-            console.log('touchend', e)
-            // alert('touchend')
-            longPressTriggeredRef.current = false;
-
-            if (holdTimerRef.current) {
-                clearInterval(holdTimerRef.current);
-                holdTimerRef.current = null;
-                setHoldProgress(0);
-                holdProgressRef.current = 0;
-                setIsWaiting(false);
-            }
+            console.log("handleCardTouchEnd")
+            e.preventDefault();
+            handleLongPressEnd()
         }
         window.addEventListener("keydown", handleKeyDown);
         window.addEventListener("keyup", handleKeyUp);
-        isMobile && cardRef.current?.addEventListener("touchstart", handleCardTouchStart);
-        isMobile && cardRef.current?.addEventListener("touchend", handleCardTouchEnd);
+        // isMobile && cardRef.current?.addEventListener("touchstart", handleCardTouchStart);
+        // isMobile && cardRef.current?.addEventListener("touchend", handleCardTouchEnd);
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
             window.removeEventListener("keyup", handleKeyUp);
-            isMobile && cardRef.current?.removeEventListener("touchstart", handleCardTouchStart);
-            isMobile && cardRef.current?.removeEventListener("touchend", handleCardTouchEnd);
+            // isMobile && cardRef.current?.removeEventListener("touchstart", handleCardTouchStart);
+            // isMobile && cardRef.current?.removeEventListener("touchend", handleCardTouchEnd);
             if (holdTimerRef.current) {
                 clearInterval(holdTimerRef.current);
                 holdTimerRef.current = null;
             }
         };
-    }, [isStarted, isFinished, submitAnswer]);
+    }, [isStarted, isFinished, submitAnswer,]);
 
     // ======== 自动聚焦输入框 ========
     useEffect(() => {
@@ -287,7 +280,7 @@ function RouteComponent() {
 
         const duration = (endTime - startTimeRef.current) / 1000;
         const correctCount = questions.filter(
-            (q, i) => String(q.answer) === answers[i],
+            (q, i) => String(q.correctAnswer) === answers[i],
         ).length;
 
         db.historyRecords
@@ -302,8 +295,11 @@ function RouteComponent() {
                 details: questions.map((q, i) => ({
                     questionText: q.text,
                     userAnswer: answers[i] || "",
-                    correctAnswer: q.answer,
-                    isCorrect: String(q.answer) === (answers[i] || ""),
+                    correctAnswer: q.correctAnswer,
+                    isCorrect: String(q.correctAnswer) === (answers[i] || ""),
+                    startTimestamp: q.startTimestamp,
+                    endTimestamp: q.endTimestamp,
+                    durationSeconds: Math.round(100 * (q.endTimestamp - q.startTimestamp) / 1000) / 100,
                 })),
                 createdAt: Date.now(),
             })
@@ -317,7 +313,7 @@ function RouteComponent() {
 
     // ======== 计算成绩 ========
     const correctCount = questions.filter(
-        (q, i) => String(q.answer) === answers[i],
+        (q, i) => String(q.correctAnswer) === answers[i],
     ).length;
 
     const finalElapsed =
@@ -420,7 +416,7 @@ function RouteComponent() {
 
                         {/* 未开始时占位提示 */}
                         {!isStarted && !isFinished && !isWaiting && (
-                            <div ref={cardRef} className="py-16 text-center text-muted-foreground">
+                            <div ref={cardRef} onTouchStart={handleLongPressStart} onTouchEnd={handleLongPressEnd} className="py-16 text-center text-muted-foreground">
                                 <p className="text-lg">🎯 准备好了吗？</p>
                                 <p className="mt-2 text-sm">长按回车键开始答题</p>
                             </div>
@@ -445,15 +441,16 @@ function RouteComponent() {
             )}
 
             {/* ======== 成绩弹窗 ======== */}
-            <ScoreDialog
+            {isFinished && <ScoreDialog
                 visible={isFinished}
+                setVisible={setIsFinished}
                 finalElapsed={finalElapsed}
                 correctCount={correctCount}
                 totalQuestions={totalQuestions}
                 questions={questions}
                 answers={answers}
                 handleRestart={handleRestart}
-            />
+            />}
             {
                 isMobile && <Numpad
                     value={amount}
