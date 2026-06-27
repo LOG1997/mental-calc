@@ -30,10 +30,7 @@ function RouteComponent() {
             finalElapsed: record.durationSeconds,
             correctCount: record.correctCount,
             totalQuestions: record.totalCount,
-            questions: record.details.map((d: any) => {
-                d.text = d.questionText;
-                return d;
-            }),
+            questions: record.details,
             answers: record.details.map((d: any) => d.userAnswer),
         }
         setRecordDetail(res);

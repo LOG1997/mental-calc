@@ -58,7 +58,7 @@ export function ScoreDialog(props: { visible: boolean, setVisible: (visible: boo
                                         <span className="w-6 text-center tabular-nums text-muted-foreground">
                                             {i + 1}
                                         </span>
-                                        <span className="flex-1 flex-nowrap text-nowrap font-mono">{q.text}</span>
+                                        <span className="flex-1 flex-nowrap text-nowrap font-mono">{q.questionText}</span>
                                         <span
                                             className={`w-8 text-right font-mono ${isCorrect ? "text-green-600" : "text-red-600"
                                                 }`}
@@ -78,7 +78,7 @@ export function ScoreDialog(props: { visible: boolean, setVisible: (visible: boo
                                                 <X className="h-4 w-4 text-red-500" />
                                             )}
                                         </span>
-                                        <span className="w-12">
+                                        <span className="w-14">
                                             <span className="text-muted-foreground">{q.durationSeconds} 秒</span>
                                         </span>
                                     </div>

@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { db } from "@/utils/db";
-import type { ModuleType, QuestionCount, Question } from "@/types";
+import type { ModuleType, QuestionCount, Question, HistoryRecord } from "@/types";
 import { generateQuestions } from "@/utils/mathGenerator";
 import { ToolBar } from './parts/-ToolBar'
 import { useGlobalSettingStore, practiceStore, usePageStateStore } from '@/stores'
@@ -49,7 +49,8 @@ function RouteComponent() {
     const [isFinished, setIsFinished] = useState(false);
     const [elapsedRealtime, setElapsedRealtime] = useState(0);
     const [amount, setAmount] = useState('')
-
+    const [dialogVisible, setDialogVisible] = useState(false)
+    const [finalResult, setFinalResult] = useState<HistoryRecord | null>(null)
     // ======== Refs ========
     const inputRef = useRef<HTMLInputElement>(null);
     const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -59,34 +60,35 @@ function RouteComponent() {
     const hasSavedRef = useRef(false);
     const cardRef = useRef<HTMLDivElement>(null);
 
+
     // ======== 派生值 ========
     const currentQuestion = questions[currentIndex];
     const totalQuestions = questions.length;
-
+    const init = useCallback(() => {
+        setCurrentIndex(0);
+        setAnswers([]);
+        hasSavedRef.current = false;
+        setIsStarted(false);
+        setIsFinished(false);
+        setIsWaiting(false);
+        setHoldProgress(0);
+        holdProgressRef.current = 0;
+        longPressTriggeredRef.current = false;
+        setStartTime(null);
+        startTimeRef.current = null;
+        setEndTime(null);
+        setElapsedRealtime(0);
+        if (holdTimerRef.current) {
+            clearInterval(holdTimerRef.current);
+            holdTimerRef.current = null;
+        }
+    }, [])
     // ======== 重置并重新生成题库 ========
     const resetAndRegenerate = useCallback(
         (module: ModuleType, count: QuestionCount) => {
-            // 取消进行中的长按
-            if (holdTimerRef.current) {
-                clearInterval(holdTimerRef.current);
-                holdTimerRef.current = null;
-            }
-            // 持久化配置
-            hasSavedRef.current = false;
+
             setQuestions(generateQuestions(module, count, seedConfig));
-            setCurrentIndex(0);
-            setAnswers([]);
-            setIsStarted(false);
-            setIsFinished(false);
-            setIsWaiting(false);
-            setHoldProgress(0);
-            holdProgressRef.current = 0;
-            longPressTriggeredRef.current = false;
-            setStartTime(null);
-            startTimeRef.current = null;
-            setEndTime(null);
-            setElapsedRealtime(0);
-            console.log("重置并重新生成题库");
+            init()
         },
         [],
     );
@@ -152,17 +154,14 @@ function RouteComponent() {
             const now = Date.now();
             questions[currentIndex].startTimestamp = now;
         }
-        // if (isStarted) {
         pageStateStore.setPracticeConfig({
             isStarted,
         })
-        // }
     }, [currentQuestion, isStarted, isFinished]);
 
     // ======== 键盘事件处理 ========
 
     const handleLongPressStart = () => {
-        console.log("长按开始", cardRef.current);
         if (!isStarted && !isFinished) {
             setIsWaiting(true);
             holdProgressRef.current = 0;
@@ -187,7 +186,6 @@ function RouteComponent() {
                     if (startTimeRef.current === null) {
                         const now = Date.now();
                         startTimeRef.current = now;
-                        console.log("记录首次答题时间:", now);
                         setStartTime(now);
                     }
                 }
@@ -198,7 +196,6 @@ function RouteComponent() {
     }
     const handleLongPressEnd = () => {
         longPressTriggeredRef.current = false;
-        console.log("长按结束", holdTimerRef, cardRef.current);
         if (holdTimerRef.current) {
             clearInterval(holdTimerRef.current);
             holdTimerRef.current = null;
@@ -209,7 +206,6 @@ function RouteComponent() {
     }
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            console.log("handleKeyDown", e.key)
             if (e.key !== "Enter") return;
             if (e.repeat) return;
 
@@ -280,42 +276,41 @@ function RouteComponent() {
         const correctCount = questions.filter(
             (q, i) => String(q.correctAnswer) === answers[i],
         ).length;
-
+        const finalResultBlock = {
+            module: currentModule,
+            questionCount,
+            startTime: startTimeRef.current,
+            endTime,
+            durationSeconds: Math.round(duration * 10) / 10,
+            correctCount,
+            totalCount: questions.length,
+            details: questions.map((q, i) => ({
+                id: q.id,
+                questionText: q.text,
+                userAnswer: answers[i] || "",
+                correctAnswer: q.correctAnswer,
+                isCorrect: String(q.correctAnswer) === (answers[i] || ""),
+                startTimestamp: q.startTimestamp,
+                endTimestamp: q.endTimestamp,
+                durationSeconds: Math.round(100 * (q.endTimestamp - q.startTimestamp) / 1000) / 100,
+            })),
+            createdAt: Date.now(),
+        }
+        setFinalResult(finalResultBlock);
         db.historyRecords
-            .add({
-                module: currentModule,
-                questionCount,
-                startTime: startTimeRef.current,
-                endTime,
-                durationSeconds: Math.round(duration * 10) / 10,
-                correctCount,
-                totalCount: questions.length,
-                details: questions.map((q, i) => ({
-                    questionText: q.text,
-                    userAnswer: answers[i] || "",
-                    correctAnswer: q.correctAnswer,
-                    isCorrect: String(q.correctAnswer) === (answers[i] || ""),
-                    startTimestamp: q.startTimestamp,
-                    endTimestamp: q.endTimestamp,
-                    durationSeconds: Math.round(100 * (q.endTimestamp - q.startTimestamp) / 1000) / 100,
-                })),
-                createdAt: Date.now(),
-            })
-            .catch((err) => console.error("保存历史记录失败:", err));
+            .add(finalResultBlock)
+            .catch((err) => console.error("保存历史记录失败:", err))
+            .finally(() => {
+                init()
+            });
+        setDialogVisible(true)
+
     }, [isFinished]);
 
     // ======== 重新开始 ========
     const handleRestart = useCallback(() => {
         resetAndRegenerate(currentModule, questionCount);
     }, [currentModule, questionCount, resetAndRegenerate]);
-
-    // ======== 计算成绩 ========
-    const correctCount = questions.filter(
-        (q, i) => String(q.correctAnswer) === answers[i],
-    ).length;
-
-    const finalElapsed =
-        startTime && endTime ? ((endTime - startTime) / 1000).toFixed(1) : "0.0";
 
     // ======== 是否显示模糊层 ========
     const showBlur = !isStarted && !isFinished;
@@ -443,14 +438,14 @@ function RouteComponent() {
             )}
 
             {/* ======== 成绩弹窗 ======== */}
-            {isFinished && <ScoreDialog
-                visible={isFinished}
-                setVisible={setIsFinished}
-                finalElapsed={finalElapsed}
-                correctCount={correctCount}
-                totalQuestions={totalQuestions}
-                questions={questions}
-                answers={answers}
+            {dialogVisible && finalResult && <ScoreDialog
+                visible={dialogVisible}
+                setVisible={setDialogVisible}
+                finalElapsed={finalResult.durationSeconds.toString()}
+                correctCount={finalResult.correctCount}
+                totalQuestions={finalResult.totalCount}
+                questions={finalResult.details}
+                answers={finalResult.details.map((item) => item.userAnswer)}
                 handleRestart={handleRestart}
             />}
             {
@@ -471,3 +466,5 @@ function RouteComponent() {
         </>
     );
 }
+
+

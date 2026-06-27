@@ -24,7 +24,6 @@ function shuffle<T>(arr: T[]): T[] {
  * 特别地，当四个参数全部为 false 时，视为生成全部类型（等同于全为 true）
  */
 function generateTwoDigitAddSub(count: number, seed: any): Question[] {
-    console.log("generateTwoDigitAddSub", seed);
     const { borrowSub, carryAdd, noBorrowSub, noCarryAdd } = seed;
 
     // 如果全部为 false，则全部开启（避免返回空集）
