@@ -19,7 +19,7 @@ interface MakeHundredStore {
 
 const initialState: any = {
     aboveHundred: {
-        enable: true,
+        enable: false,
         desc: '超过一百',
     },
     belowHundred: {

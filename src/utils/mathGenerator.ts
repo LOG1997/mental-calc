@@ -121,31 +121,62 @@ function generateTwoDigitAddSub(count: number, seed: any): Question[] {
 }
 
 /**
- * 凑整百（扩展版）
+ * 凑整百
  * 目标数从 100, 200, 300, ..., 900 中随机选取，
  * 生成形如 "x + ? = 整百数" 的题目，其中 1 ≤ x ≤ 目标数-1。
  */
-function generateMakeHundred(count: number): Question[] {
-    // 所有可能的整百目标（100 ~ 900，步长100）
-    const targets = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
-    const questions: Question[] = [];
+function generateMakeHundred(count: number, seed: any): Question[] {
+    console.log('generateMakeHundred seed', seed);
 
-    for (let i = 0; i < count; i++) {
-        // 随机选取一个目标整百数
-        const target = targets[Math.floor(Math.random() * targets.length)];
-        // 随机生成 x（1 到 target-1）
-        const x = Math.floor(Math.random() * (target - 1)) + 1;
-        questions.push({
-            id: i,
-            text: `${x} + ? = ${target}`,
-            correctAnswer: target - x,
-            durationSeconds: 0,
-            startTimestamp: 0,
-            endTimestamp: 0,
-        });
+    // 从 seed 中读取配置（若未定义则默认 true，即混合）
+    const above = seed?.aboveHundred?.enable ?? true;
+    const below = seed?.belowHundred?.enable ?? true;
+
+    // 确定模式：
+    // - 'above'  : 只取答案 > 100
+    // - 'below'  : 只取答案 < 100
+    // - 'mixed'  : 答案范围不限（包括两者都为 false 的情况）
+    const mode = (above && !below) ? 'above'
+        : (!above && below) ? 'below'
+            : 'mixed';
+
+    const targets = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+
+    // 预生成所有合法组合 (target, x) 并计算答案
+    const allCombinations: { target: number; x: number; answer: number }[] = [];
+    for (const target of targets) {
+        for (let x = 1; x < target; x++) {
+            allCombinations.push({ target, x, answer: target - x });
+        }
     }
 
-    return questions;
+    // 根据模式过滤（mixed 模式不过滤，即全部输出）
+    let filtered = allCombinations;
+    if (mode === 'above') {
+        filtered = allCombinations.filter(q => q.answer > 100);
+    } else if (mode === 'below') {
+        filtered = allCombinations.filter(q => q.answer < 100);
+    }
+    // 若 mode === 'mixed'，则 filtered 保留全部
+
+    // 若过滤后无可用题目（极少发生），抛出错误
+    if (filtered.length === 0) {
+        throw new Error(`No questions available for mode: ${mode}`);
+    }
+
+    // 打乱后随机抽取 count 个（若 count 超过总数，则返回全部）
+    const shuffled = filtered.sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+
+    // 构造最终题目数组
+    return selected.map((q, index) => ({
+        id: index,
+        text: `${q.x} + ? = ${q.target}`,
+        correctAnswer: q.answer,
+        durationSeconds: 0,
+        startTimestamp: 0,
+        endTimestamp: 0,
+    }));
 }
 
 /** 三位数加法：两个100~999的数相加 */
