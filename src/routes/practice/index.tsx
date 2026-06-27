@@ -86,7 +86,6 @@ function RouteComponent() {
     // ======== 重置并重新生成题库 ========
     const resetAndRegenerate = useCallback(
         (module: ModuleType, count: QuestionCount) => {
-
             setQuestions(generateQuestions(module, count, seedConfig));
             init()
         },
@@ -310,6 +309,8 @@ function RouteComponent() {
     // ======== 重新开始 ========
     const handleRestart = useCallback(() => {
         resetAndRegenerate(currentModule, questionCount);
+        setDialogVisible(false)
+
     }, [currentModule, questionCount, resetAndRegenerate]);
 
     // ======== 是否显示模糊层 ========
