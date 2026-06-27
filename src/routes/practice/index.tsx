@@ -222,16 +222,7 @@ function RouteComponent() {
             handleLongPressEnd()
         };
 
-        const handleCardTouchStart = (e: TouchEvent) => {
-            console.log("handleCardTouchStart")
-            e.preventDefault();
-            handleLongPressStart()
-        }
-        const handleCardTouchEnd = (e: TouchEvent) => {
-            console.log("handleCardTouchEnd")
-            e.preventDefault();
-            handleLongPressEnd()
-        }
+
         window.addEventListener("keydown", handleKeyDown);
         window.addEventListener("keyup", handleKeyUp);
         // isMobile && cardRef.current?.addEventListener("touchstart", handleCardTouchStart);
@@ -454,7 +445,12 @@ function RouteComponent() {
             {
                 isMobile && <Numpad
                     value={amount}
-                    onChange={(val) => { setAmount(val) }}
+                    onChange={(val) => {
+                        if (!isStarted) {
+                            return
+                        }
+                        setAmount(val)
+                    }}
                     onConfirm={submitAnswer}
                     decimal={true}
                     maxLength={12}
