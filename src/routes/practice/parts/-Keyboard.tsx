@@ -25,8 +25,8 @@ const getDefaultRows = (decimal: boolean): KeyType[][] => {
         ['1', '2', '3'],
         ['4', '5', '6'],
         ['7', '8', '9'],
-        decimal ? ['.', '0', 'backspace'] : ['', '0', 'backspace'],
-        ['clear', '', 'confirm'],
+        decimal ? ['.', '0', 'confirm'] : ['', '0', 'confirm'],
+        ['clear', '', 'backspace'],
     ];
     return rows;
 };
