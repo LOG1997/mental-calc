@@ -13,12 +13,19 @@ import PracticeCheckList from '@/components/PracticeCheckList'
 import PracticeDialog from '@/components/PracticeDialog'
 import type { ModuleType } from '@/types'
 import { Settings } from 'lucide-react'
+import { useGlobalSettingStore } from '@/stores'
 
 
 export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
     const navigate = useNavigate()
+    const globalSettingStore = useGlobalSettingStore()
+
+    const handleGotoPage = (module: ModuleType) => {
+        globalSettingStore.setModule(module)
+        navigate({ to: `/practice` })
+    }
     return (
         <div className="p-8">
             <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
@@ -42,13 +49,13 @@ function Home() {
                                 <PracticeCheckList moduleType={module as ModuleType} disabled={true} />
                             </CardContent>
                             <CardFooter>
-                                <Button variant="outline" size="sm" className="w-full" onClick={() => navigate({ to: `/practice` })}>
+                                <Button variant="outline" size="sm" className="w-full" onClick={() => handleGotoPage(module as ModuleType)}>
                                     Enter
                                 </Button>
                             </CardFooter>
                         </Card>
                     ))
                 }</div>
-        </div>
+        </div >
     )
 }

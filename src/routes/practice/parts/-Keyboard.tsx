@@ -147,9 +147,10 @@ const Numpad: React.FC<NumpadProps> = ({
                                 // 移动端触摸反馈
                                 onTouchStart={(e) => {
                                     e.currentTarget.style.transform = 'scale(0.95)';
+                                    console.log('触摸开始', key);
                                     // 震动反馈
                                     if ('vibrate' in navigator) {
-                                        navigator.vibrate(50);
+                                        navigator.vibrate(Number(key) * 10 + 20 || 50);
                                     }
                                 }}
                                 onTouchEnd={(e) => {

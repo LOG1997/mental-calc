@@ -10,7 +10,7 @@ export default function Layout() {
             {
                 !pageStateStore.practiceConfig.isStarted && <Header />
             }
-            <main className="mt-2">
+            <main className="mt-10">
                 <Outlet />
             </main>
             <Toaster />

@@ -109,17 +109,17 @@ function RouteComponent() {
         // 判断答案是否正确
         const isCorrect = rawAnswer === currentQuestion.correctAnswer.toString();
         if (!isCorrect) {
-            toast.error("答案错误", {
+            toast.error(<span className='test-red-400'>答案错误</span>, {
                 duration: 2000,
                 icon: <CircleX className='text-red-500 size-4' />,
-                position: "top-center"
+                position: "top-right"
             })
         }
         if (isCorrect) {
-            toast.success("答案正确", {
+            toast.success(<span className='test-green-400'>答案正确</span>, {
                 duration: 2000,
                 icon: <CircleCheck className='text-green-500 size-4' />,
-                position: "top-center"
+                position: "top-right"
             })
         }
         // 记录答案
@@ -154,9 +154,9 @@ function RouteComponent() {
             questions[currentIndex].startTimestamp = now;
         }
         pageStateStore.setPracticeConfig({
-            isStarted,
+            isStarted: isStarted || isWaiting,
         })
-    }, [currentQuestion, isStarted, isFinished]);
+    }, [currentQuestion, isStarted, isFinished, isWaiting]);
 
     // ======== 键盘事件处理 ========
 
@@ -313,6 +313,10 @@ function RouteComponent() {
 
     }, [currentModule, questionCount, resetAndRegenerate]);
 
+    useEffect(() => {
+        resetAndRegenerate(currentModule, questionCount);
+    }, [currentModule, questionCount]);
+
     // ======== 是否显示模糊层 ========
     const showBlur = !isStarted && !isFinished;
 
@@ -338,12 +342,12 @@ function RouteComponent() {
                         </>
                     )}
 
-                    <CardContent className="p-2">
+                    <CardContent className="p-2 h-60">
                         {!isFinished && (
                             <div className="space-y-6">
                                 {/* 进度条区域 */}
                                 {isWaiting ? (
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 h-full">
                                         <p className="text-center text-sm text-muted-foreground">
                                             按住回车键不放...
                                         </p>
@@ -397,14 +401,14 @@ function RouteComponent() {
                                                 type="text"
                                                 inputMode="numeric"
                                                 placeholder="输入答案"
-                                                className="text-center text-lg"
+                                                className="text-center text-xl"
                                                 autoComplete="off"
                                                 value={amount}
                                                 readOnly={isMobile ? true : false}
                                                 onChange={(e) => setAmount(e.target.value)}
                                             />
                                             <p className="mt-2 text-center text-xs text-muted-foreground">
-                                                输入答案后按空格键提交
+                                                输入答案后按回车键提交
                                             </p>
                                         </div>
                                     </div>
