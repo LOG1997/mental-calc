@@ -7,19 +7,23 @@ interface GlobalSettingStore {
     config: {
         module: ModuleType;
         questionCount: QuestionCount;
+        autoDone: boolean;
     };
     setModule: (module: ModuleType) => void;
     setQuestionCount: (questionCount: QuestionCount) => void;
     setConfig: (info: GlobalSettingStore['config']) => void;
+    setAutoDone: (autoDone: boolean) => void;
     clearConfig: () => void;
 }
 
 const initialState: {
     module: ModuleType;
     questionCount: QuestionCount;
+    autoDone: boolean;
 } = {
     module: 'two_digit_add_sub',
-    questionCount: 10
+    questionCount: 10,
+    autoDone: false
 };
 
 // 2. 创建持久化 Store
@@ -41,6 +45,14 @@ export const useGlobalSettingStore = create<GlobalSettingStore>()(
                     config: {
                         ...useGlobalSettingStore.getState().config,
                         questionCount
+                    }
+                });
+            },
+            setAutoDone: (autoDone: boolean) => {
+                set({
+                    config: {
+                        ...useGlobalSettingStore.getState().config,
+                        autoDone
                     }
                 });
             },

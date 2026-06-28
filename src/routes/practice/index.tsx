@@ -32,7 +32,7 @@ function RouteComponent() {
     const isMobile = getIsMobile()
     const globalSettingStore = useGlobalSettingStore()
     const pageStateStore = usePageStateStore()
-    const { module: currentModule, questionCount } = globalSettingStore.config
+    const { module: currentModule, questionCount, autoDone } = globalSettingStore.config
     const currentPracticeStore = practiceStore[currentModule]()
     const { config: seedConfig } = currentPracticeStore
 
@@ -113,14 +113,14 @@ function RouteComponent() {
             toast.error(<span className='test-red-400'>答案错误</span>, {
                 duration: 2000,
                 icon: <CircleX className='text-red-500 size-4' />,
-                position: "top-right"
+                position: "bottom-right"
             })
         }
         if (isCorrect) {
             toast.success(<span className='test-green-400'>答案正确</span>, {
                 duration: 2000,
                 icon: <CircleCheck className='text-green-500 size-4' />,
-                position: "top-right"
+                position: "bottom-center"
             })
         }
         // 记录答案
@@ -320,6 +320,21 @@ function RouteComponent() {
 
     // ======== 是否显示模糊层 ========
     const showBlur = !isStarted && !isFinished;
+    // 
+    // 监听答案输入，满足条件自动提交
+    useEffect(() => {
+        if (!autoDone || !isStarted || currentIndex >= questions.length) {
+            return
+        }
+        const correctAnswerStr = String(questions[currentIndex].correctAnswer);
+        const userAnswerStr = amount;
+
+        // 当用户输入的位数等于正确答案的位数时，自动提交
+        if (userAnswerStr.length > 0 && userAnswerStr.length === correctAnswerStr.length) {
+            console.log("位数匹配，自动提交", userAnswerStr)
+            submitAnswer();
+        }
+    }, [currentIndex, isStarted, isFinished, submitAnswer, autoDone, amount]);
 
     // ======== 渲染 ========
     return (

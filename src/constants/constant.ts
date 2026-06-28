@@ -34,6 +34,7 @@ export const MODULE_LABELS: Record<ModuleType, { name: string; value: ModuleType
         name: '加减法末位判断',
         value: 'add_sub_last_digit',
     },
+    // 
 
 }
 
