@@ -365,7 +365,11 @@ function RouteComponent() {
                                 {isWaiting ? (
                                     <div className="space-y-2 h-full">
                                         <p className="text-center text-sm text-muted-foreground">
-                                            按住回车键不放...
+                                            按住
+                                            {
+                                                !isMobile && <span>回车键</span>
+                                            }
+                                            不放...
                                         </p>
                                         <Progress value={holdProgress} className="h-3" />
                                     </div>
@@ -399,7 +403,11 @@ function RouteComponent() {
                                     </div>
                                 ) : (
                                     <div className="py-4 text-center text-muted-foreground">
-                                        选择模块和题量后，长按回车键开始
+                                        选择模块和题量后，长按
+                                        {
+                                            !isMobile && <span>回车键</span>
+                                        }
+                                        开始
                                     </div>
                                 )}
 
@@ -426,9 +434,12 @@ function RouteComponent() {
                                                 readOnly={isMobile ? true : false}
                                                 onChange={(e) => setAmount(e.target.value)}
                                             />
-                                            <p className="mt-2 text-center text-xs text-muted-foreground">
-                                                输入答案后按回车键提交
-                                            </p>
+                                            {
+                                                !isMobile && <p className="mt-2 text-center text-xs text-muted-foreground">
+                                                    输入答案后按回车键提交
+                                                </p>
+                                            }
+
                                         </div>
                                     </div>
                                 )}
@@ -437,9 +448,13 @@ function RouteComponent() {
 
                         {/* 未开始时占位提示 */}
                         {!isStarted && !isFinished && !isWaiting && (
-                            <div ref={cardRef} onTouchStart={handleLongPressStart} onTouchEnd={handleLongPressEnd} className="py-16 text-center text-muted-foreground">
+                            <div ref={cardRef} onTouchStart={handleLongPressStart} onTouchEnd={handleLongPressEnd} className="py-16 text-center text-muted-foreground absolute inset-0 flex items-center justify-center z-50">
                                 <p className="text-lg">🎯 准备好了吗？</p>
-                                <p className="mt-2 text-sm">长按回车键开始答题</p>
+                                <p className="mt-2 text-sm">长按
+                                    {
+                                        !isMobile && <span>回车键</span>
+                                    }
+                                    开始答题</p>
                             </div>
                         )}
                     </CardContent>
@@ -448,15 +463,25 @@ function RouteComponent() {
 
             {/* ======== 长按浮层 ======== */}
             {isWaiting && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
                     <div className="w-80 rounded-lg bg-white p-8 shadow-xl">
                         <p className="mb-4 text-center text-lg font-medium">
-                            长按回车键开始答题
+                            长按
+                            {
+                                !isMobile && <span>回车键</span>
+                            }
+
+                            开始答题
                         </p>
                         <Progress value={holdProgress} className="h-3" />
-                        <p className="mt-3 text-center text-sm text-muted-foreground">
-                            松开即取消
-                        </p>
+                        {
+                            !isMobile && (
+                                <p className="mt-3 text-center text-sm text-muted-foreground">
+                                    松开即取消
+                                </p>
+                            )
+                        }
+
                     </div>
                 </div>
             )}
