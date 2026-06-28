@@ -375,6 +375,71 @@ function generateMixedAddSub(count: number): Question[] {
     return shuffle(questions);
 }
 
+function generateAddSubLastDigit(count: number): Question[] {
+    const set = new Set<string>();
+    const questions: Question[] = [];
+    let attempts = 0;
+    const maxAttempts = count * 50; // 安全上限
+
+    while (questions.length < count && attempts < maxAttempts) {
+        attempts++;
+
+        // 随机决定是生成加法还是减法 (50% 概率)
+        const isAddition = Math.random() < 0.5;
+
+        let a = randInt(10, 99);
+        let b = randInt(10, 99);
+        let isValid = false;
+        let key = '';
+        let text = '';
+        let correctAnswer = 0;
+
+        if (isAddition) {
+            // 进位加法：个位之和 >= 10
+            if ((a % 10) + (b % 10) >= 10) {
+                key = `${a}+${b}`;
+                text = `${a} + ${b} = ?`;
+                correctAnswer = (a + b) % 10;
+                isValid = true;
+            }
+        } else {
+            // 借位减法：确保 a > b 且 a的个位 < b的个位
+            // 先保证 a > b，如果不满足则交换
+            if (a < b) {
+                [a, b] = [b, a];
+            }
+
+            // 如果相等，跳过，因为减法结果为0且无借位概念（或视为特殊情况）
+            if (a === b) continue;
+
+            // 检查是否借位：被减数个位 < 减数个位
+            if ((a % 10) < (b % 10)) {
+                key = `${a}-${b}`;
+                text = `${a} - ${b} = ?`;
+                correctAnswer = (a - b) % 10;
+                isValid = true;
+            }
+        }
+
+        if (!isValid) continue;
+
+        // 全局去重
+        if (set.has(key)) continue;
+        set.add(key);
+
+        questions.push({
+            id: questions.length,
+            text: text,
+            correctAnswer: correctAnswer,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
+        });
+    }
+
+    return shuffle(questions);
+}
+
 // ======== 统一导出 ========
 
 const generators: Record<ModuleType, (count: number, seed: any) => Question[]> = {
@@ -385,6 +450,7 @@ const generators: Record<ModuleType, (count: number, seed: any) => Question[]> =
     three_digit_mixed: generateThreeDigitMixed,
     multi_add: generateMultiAdd,
     mixed_add_sub: generateMixedAddSub,
+    add_sub_last_digit: generateAddSubLastDigit,
 };
 
 export function generateQuestions(

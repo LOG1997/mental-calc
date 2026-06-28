@@ -11,4 +11,5 @@ export const practiceStore = {
     [MODULE_LABELS.three_digit_mixed.value]: useTwoDigitAddSubStore,
     [MODULE_LABELS.multi_add.value]: useTwoDigitAddSubStore,
     [MODULE_LABELS.mixed_add_sub.value]: useTwoDigitAddSubStore,
+    [MODULE_LABELS.add_sub_last_digit.value]: useTwoDigitAddSubStore,
 }

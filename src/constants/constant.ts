@@ -30,6 +30,11 @@ export const MODULE_LABELS: Record<ModuleType, { name: string; value: ModuleType
         name: '混合加减',
         value: 'mixed_add_sub',
     },
+    add_sub_last_digit: {
+        name: '加减法末位判断',
+        value: 'add_sub_last_digit',
+    },
+
 }
 
 
