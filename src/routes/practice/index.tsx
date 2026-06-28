@@ -113,14 +113,14 @@ function RouteComponent() {
             toast.error(<span className='test-red-400'>答案错误</span>, {
                 duration: 2000,
                 icon: <CircleX className='text-red-500 size-4' />,
-                position: "bottom-right"
+                position: "top-center"
             })
         }
         if (isCorrect) {
             toast.success(<span className='test-green-400'>答案正确</span>, {
                 duration: 2000,
                 icon: <CircleCheck className='text-green-500 size-4' />,
-                position: "bottom-center"
+                position: "top-center"
             })
         }
         // 记录答案
