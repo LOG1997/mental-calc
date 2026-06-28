@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import {
     Card,
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
@@ -28,7 +27,6 @@ function Home() {
     }
     return (
         <div className="p-8">
-            <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
             <div className="w-full gap-6 flex flex-wrap justify-start">
                 {
                     Object.entries(MODULE_LABELS).map(([module, { name: label }]) => (
