@@ -14,6 +14,7 @@ import Numpad from './parts/-Keyboard'
 import { getIsMobile } from '@/utils/system'
 import { toast } from 'sonner'
 import { CircleX, CircleCheck } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/practice/')({
     component: RouteComponent,
@@ -355,9 +356,12 @@ function RouteComponent() {
                                     </div>
                                 ) : isStarted ? (
                                     <div className="space-y-2">
+                                        <Button className='absolute top-2 right-2' onClick={handleRestart}>重开</Button>
                                         {/* 实时计时 */}
                                         <div className="text-center text-sm tabular-nums text-muted-foreground">
-                                            ⏱ 已用时间: {formatTime(elapsedRealtime)}
+                                            <p>
+                                                ⏱ 已用时间: {formatTime(elapsedRealtime)}
+                                            </p>
                                         </div>
                                         {/* 进度条 */}
                                         <div className="space-y-1">
