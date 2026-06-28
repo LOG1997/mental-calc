@@ -375,7 +375,25 @@ function generateMixedAddSub(count: number): Question[] {
     return shuffle(questions);
 }
 
-function generateAddSubLastDigit(count: number): Question[] {
+function generateAddSubLastDigit(count: number, seed: any): Question[] {
+    // 解析 seed，默认如果未提供或结构缺失，则视为全部开启
+    const isAddEnabled = seed?.add?.enable ?? true;
+    const isSubEnabled = seed?.sub?.enable ?? true;
+
+    // 确定激活的类型
+    const activeTypes: string[] = [];
+
+    // 逻辑：如果只有一个开启，则只生成那一种；否则（都开或都关）生成全部
+    if (isAddEnabled && !isSubEnabled) {
+        activeTypes.push('carryAdd');
+    } else if (!isAddEnabled && isSubEnabled) {
+        activeTypes.push('borrowSub');
+    } else {
+        // 两者都启用 或 两者都禁用 -> 全部生成
+        activeTypes.push('carryAdd');
+        activeTypes.push('borrowSub');
+    }
+
     const set = new Set<string>();
     const questions: Question[] = [];
     let attempts = 0;
@@ -384,8 +402,8 @@ function generateAddSubLastDigit(count: number): Question[] {
     while (questions.length < count && attempts < maxAttempts) {
         attempts++;
 
-        // 随机决定是生成加法还是减法 (50% 概率)
-        const isAddition = Math.random() < 0.5;
+        // 从激活的题型中随机选一种
+        const type = activeTypes[Math.floor(Math.random() * activeTypes.length)];
 
         let a = randInt(10, 99);
         let b = randInt(10, 99);
@@ -394,28 +412,30 @@ function generateAddSubLastDigit(count: number): Question[] {
         let text = '';
         let correctAnswer = 0;
 
-        if (isAddition) {
+        if (type === 'carryAdd') {
             // 进位加法：个位之和 >= 10
             if ((a % 10) + (b % 10) >= 10) {
                 key = `${a}+${b}`;
                 text = `${a} + ${b} = ?`;
+                // 答案只取个位
                 correctAnswer = (a + b) % 10;
                 isValid = true;
             }
-        } else {
+        } else if (type === 'borrowSub') {
             // 借位减法：确保 a > b 且 a的个位 < b的个位
             // 先保证 a > b，如果不满足则交换
             if (a < b) {
                 [a, b] = [b, a];
             }
 
-            // 如果相等，跳过，因为减法结果为0且无借位概念（或视为特殊情况）
+            // 如果相等，跳过
             if (a === b) continue;
 
             // 检查是否借位：被减数个位 < 减数个位
             if ((a % 10) < (b % 10)) {
                 key = `${a}-${b}`;
                 text = `${a} - ${b} = ?`;
+                // 答案只取个位
                 correctAnswer = (a - b) % 10;
                 isValid = true;
             }
