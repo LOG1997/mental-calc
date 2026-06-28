@@ -1,6 +1,7 @@
 {
   "name": "mental-calc-copy",
   "private": true,
+  "version": "0.0.15",
   "type": "module",
   "imports": {
     "#/*": "./src/*"
@@ -13,7 +14,8 @@
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
-    "check": "prettier --check ."
+    "check": "prettier --check .",
+    "release": "node ./build/action.js"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
