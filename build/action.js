@@ -1,7 +1,12 @@
 // build/action.js
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+// 获取当前文件的目录路径 (ESM 中 __dirname 不可用)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 获取命令行参数
 const args = process.argv.slice(2);
@@ -12,7 +17,7 @@ if (args.length === 0) {
 
 const versionInput = args[0];
 
-// 验证版本号格式 (可选，这里简单检查是否以 v 开头)
+// 验证版本号格式
 if (!versionInput.startsWith('v')) {
     console.error('❌ 错误: 版本号必须以 "v" 开头，例如: v0.0.16');
     process.exit(1);
@@ -27,7 +32,8 @@ const packageJsonPath = path.resolve(__dirname, '../package.json');
 try {
     // 1. 读取 package.json
     console.log(`📦 正在读取 package.json...`);
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(packageJsonContent);
 
     // 2. 更新 version 字段
     console.log(`🔄 更新版本: ${packageJson.version} -> ${cleanVersion}`);
@@ -64,6 +70,5 @@ try {
 
 } catch (error) {
     console.error('❌ 执行出错:', error.message);
-    // 如果出错，可以选择回滚 package.json，这里简单退出
     process.exit(1);
 }
