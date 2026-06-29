@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/mental-calc/dev-sw.js?dev-sw', { scope: '/mental-calc/', type: 'classic' })
