@@ -23,8 +23,8 @@ const config = defineConfig({
             manifest: {
                 name: 'Mental Calc-速算练习',
                 short_name: 'Mental Calc',
-                start_url: '/mental-calc', // Hash根路由入口
-                scope: '/mental-calc',
+                start_url: '/mental-calc/practice',
+                scope: '/mental-calc/',
                 display: 'standalone', // 独立App窗口，无浏览器地址栏
                 background_color: '#ffffff',
                 theme_color: '#165DFF',
