@@ -316,7 +316,7 @@ function RouteComponent() {
 
     useEffect(() => {
         resetAndRegenerate(currentModule, questionCount);
-    }, [currentModule, questionCount]);
+    }, [currentModule, questionCount, resetAndRegenerate, seedConfig]);
 
     // ======== 是否显示模糊层 ========
     const showBlur = !isStarted && !isFinished;

@@ -379,7 +379,7 @@ function generateAddSubLastDigit(count: number, seed: any): Question[] {
     // 解析 seed，默认如果未提供或结构缺失，则视为全部开启
     const isAddEnabled = seed?.add?.enable ?? true;
     const isSubEnabled = seed?.sub?.enable ?? true;
-    const isSpecialEnabled = seed?.special?.enable ?? true;
+    const isSpecialEnabled = seed?.specialSub?.enable ?? true;
 
     // 确定激活的类型
     const activeTypes: string[] = [];
@@ -391,9 +391,9 @@ function generateAddSubLastDigit(count: number, seed: any): Question[] {
         // 否则只添加启用的类型
         if (isAddEnabled) activeTypes.push('carryAdd');
         if (isSubEnabled) activeTypes.push('borrowSub');
-        if (isSpecialEnabled) activeTypes.push('special');
+        // 特殊减法,都不选才添加
+        if (isSpecialEnabled && !isSubEnabled && !isAddEnabled) activeTypes.push('specialSub');
     }
-
     const set = new Set<string>();
     const questions: Question[] = [];
     let attempts = 0;
@@ -439,7 +439,7 @@ function generateAddSubLastDigit(count: number, seed: any): Question[] {
                 correctAnswer = (a - b) % 10;
                 isValid = true;
             }
-        } else if (type === 'special') {
+        } else if (type === 'specialSub') {
             // 特殊题型：借位的11~19减去个位数(1~9)
             a = randInt(11, 19);
             b = randInt(1, 9);

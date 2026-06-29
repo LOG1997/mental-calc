@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+
 import { useState, useCallback } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,18 @@ import {
     FieldTitle,
 } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 import { Checkbox } from "@/components/ui/checkbox"
 import { MODULE_LABELS, } from '@/constants/constant'
 import type { ModuleType, QuestionCount } from '@/types'
@@ -40,6 +52,11 @@ export function ToolBar() {
 
     const handleCountChange = useCallback((count: string) => {
         globalSettingStore.setQuestionCount(Number(count) as QuestionCount)
+    }, [])
+
+    const resetAllSettings = useCallback(() => {
+        // 清空localStorage
+        window.localStorage.clear()
     }, [])
 
     return (
@@ -81,6 +98,32 @@ export function ToolBar() {
                             <Field orientation="vertical">
                                 <FieldLabel htmlFor="name">题目类型设置</FieldLabel>
                                 <ConfigEditContent moduleType={module} disabled={false} />
+                            </Field>
+                            <Field orientation="vertical">
+                                <FieldLabel htmlFor="name">重置设置</FieldLabel>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                        >
+                                            重置设置
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>你确认要全部重置吗？</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                该操作会重置您的设置，但会保留您的历史数据。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>取消</AlertDialogCancel>
+                                            <AlertDialogAction onClick={resetAllSettings}>确定</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+
                             </Field>
                         </FieldGroup>
                     </div>
