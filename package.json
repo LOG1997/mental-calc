@@ -1,7 +1,7 @@
 {
   "name": "mental-calc-copy",
   "private": true,
-  "version": "0.0.18",
+  "version": "0.0.19",
   "type": "module",
   "imports": {
     "#/*": "./src/*"
