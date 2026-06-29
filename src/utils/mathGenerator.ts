@@ -379,19 +379,19 @@ function generateAddSubLastDigit(count: number, seed: any): Question[] {
     // 解析 seed，默认如果未提供或结构缺失，则视为全部开启
     const isAddEnabled = seed?.add?.enable ?? true;
     const isSubEnabled = seed?.sub?.enable ?? true;
+    const isSpecialEnabled = seed?.special?.enable ?? true;
 
     // 确定激活的类型
     const activeTypes: string[] = [];
 
     // 逻辑：如果只有一个开启，则只生成那一种；否则（都开或都关）生成全部
-    if (isAddEnabled && !isSubEnabled) {
-        activeTypes.push('carryAdd');
-    } else if (!isAddEnabled && isSubEnabled) {
-        activeTypes.push('borrowSub');
+    if (!isAddEnabled && !isSubEnabled && !isSpecialEnabled) {
+        activeTypes.push('carryAdd', 'borrowSub');
     } else {
-        // 两者都启用 或 两者都禁用 -> 全部生成
-        activeTypes.push('carryAdd');
-        activeTypes.push('borrowSub');
+        // 否则只添加启用的类型
+        if (isAddEnabled) activeTypes.push('carryAdd');
+        if (isSubEnabled) activeTypes.push('borrowSub');
+        if (isSpecialEnabled) activeTypes.push('special');
     }
 
     const set = new Set<string>();
@@ -439,6 +439,20 @@ function generateAddSubLastDigit(count: number, seed: any): Question[] {
                 correctAnswer = (a - b) % 10;
                 isValid = true;
             }
+        } else if (type === 'special') {
+            // 特殊题型：借位的11~19减去个位数(1~9)
+            a = randInt(11, 19);
+            b = randInt(1, 9);
+
+            // 借位条件：减数 b 必须大于被减数 a 的个位数
+            if (b > (a % 10)) {
+                key = `${a}-${b}`;
+                text = `${a} - ${b} = ?`;
+                // 此类题目结果即为个位数（例如 12-5=7）
+                correctAnswer = a - b;
+                isValid = true;
+            }
+
         }
 
         if (!isValid) continue;

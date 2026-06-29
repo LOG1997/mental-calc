@@ -12,6 +12,10 @@ interface AddSubLastDigitStore {
             enable: boolean;
             desc: string;
         };
+        specialSub: {
+            enable: boolean;
+            desc: string;
+        }
     };
     setConfig: (info: AddSubLastDigitStore['config']) => void;
     clearConfig: () => void;
@@ -26,6 +30,10 @@ const initialState: any = {
         enable: true,
         desc: '减法',
     },
+    specialSub: {
+        enable: false,
+        desc: '特殊练习'
+    }
 };
 
 // 2. 创建持久化 Store
