@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { useState, useCallback } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -25,18 +26,22 @@ import { MODULE_LABELS, } from '@/constants/constant'
 import type { ModuleType, QuestionCount } from '@/types'
 import { useGlobalSettingStore } from '@/stores'
 import { Settings } from 'lucide-react'
+import { ConfigEditContent } from '@/components/PracticeDialog/ConfigEditContent'
 
 export function ToolBar() {
     const globalSettingStore = useGlobalSettingStore()
     const { module, questionCount, autoDone } = globalSettingStore.config
 
     const QUESTION_COUNT_OPTIONS: QuestionCount[] = [10, 15, 20, 30, 50, 100];
+
     const handleModuleChange = useCallback((currentModule: ModuleType) => {
         globalSettingStore.setModule(currentModule)
     }, [])
+
     const handleCountChange = useCallback((count: string) => {
         globalSettingStore.setQuestionCount(Number(count) as QuestionCount)
     }, [])
+
     return (
         <div className="mb-4 flex items-center justify-end gap-3">
             {/* 其他设置操作 */}
@@ -50,7 +55,7 @@ export function ToolBar() {
                     <DialogHeader>
                         <DialogTitle>设置</DialogTitle>
                         <DialogDescription>
-                            您的全局设置.
+                            您的个人设置.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex items-center gap-2">
@@ -60,8 +65,8 @@ export function ToolBar() {
                                     id="terms-checkbox-2"
                                     name="terms-checkbox-2"
                                     defaultChecked={autoDone}
-                                    onCheckedChange={(checked) => {
-                                        globalSettingStore.setAutoDone(checked as boolean)
+                                    onCheckedChange={(checked: boolean) => {
+                                        globalSettingStore.setAutoDone(checked)
                                     }}
                                 />
                                 <FieldContent>
@@ -73,11 +78,15 @@ export function ToolBar() {
                                     </FieldDescription>
                                 </FieldContent>
                             </Field>
+                            <Field orientation="vertical">
+                                <FieldLabel htmlFor="name">题目类型设置</FieldLabel>
+                                <ConfigEditContent moduleType={module} disabled={false} />
+                            </Field>
                         </FieldGroup>
                     </div>
                     <DialogFooter className="sm:justify-start">
                         <DialogClose asChild>
-                            <Button type="button">Close</Button>
+                            <Button type="button">关闭</Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>

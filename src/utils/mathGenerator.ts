@@ -374,7 +374,7 @@ function generateMixedAddSub(count: number): Question[] {
 
     return shuffle(questions);
 }
-
+/** 加减法中判断个位数：10~99 的数，加减随机， */
 function generateAddSubLastDigit(count: number, seed: any): Question[] {
     // 解析 seed，默认如果未提供或结构缺失，则视为全部开启
     const isAddEnabled = seed?.add?.enable ?? true;
