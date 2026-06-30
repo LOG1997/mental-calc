@@ -78,52 +78,14 @@ export function ToolBar() {
                     <div className="flex items-center gap-2">
                         <FieldGroup className="max-w-sm">
                             <Field orientation="horizontal">
-                                <Checkbox
-                                    id="terms-checkbox-2"
-                                    name="terms-checkbox-2"
-                                    defaultChecked={autoDone}
-                                    onCheckedChange={(checked: boolean) => {
-                                        globalSettingStore.setAutoDone(checked)
-                                    }}
-                                />
-                                <FieldContent>
-                                    <FieldLabel htmlFor="terms-checkbox-2">
-                                        自动提交
-                                    </FieldLabel>
-                                    <FieldDescription>
-                                        您输入与答案长度相等的答案后自动提交.
-                                    </FieldDescription>
-                                </FieldContent>
+                                <AutoDoneField autoDone={autoDone} globalSettingStore={globalSettingStore} />
                             </Field>
                             <Field orientation="vertical">
                                 <FieldLabel htmlFor="name">题目类型设置</FieldLabel>
                                 <ConfigEditContent moduleType={module} disabled={false} />
                             </Field>
                             <Field orientation="vertical">
-                                <FieldLabel htmlFor="name">重置设置</FieldLabel>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button
-                                            type="button"
-                                            variant="destructive"
-                                        >
-                                            重置设置
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>你确认要全部重置吗？</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                该操作会重置您的设置，但会保留您的历史数据。
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>取消</AlertDialogCancel>
-                                            <AlertDialogAction onClick={resetAllSettings}>确定</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-
+                                <ResetField resetAllSettings={resetAllSettings} />
                             </Field>
                         </FieldGroup>
                     </div>
@@ -165,4 +127,62 @@ export function ToolBar() {
             </Select>
         </div>
     )
+}
+
+
+function AutoDoneField(props: { autoDone: boolean, globalSettingStore: any }) {
+    const { autoDone, globalSettingStore } = props
+    return (
+        <>
+            <Checkbox
+                id="terms-checkbox-2"
+                name="terms-checkbox-2"
+                defaultChecked={autoDone}
+                onCheckedChange={(checked: boolean) => {
+                    globalSettingStore.setAutoDone(checked)
+                }}
+            />
+            <FieldContent>
+                <FieldLabel htmlFor="terms-checkbox-2">
+                    自动提交
+                </FieldLabel>
+                <FieldDescription>
+                    您输入与答案长度相等的答案后自动提交.
+                </FieldDescription>
+            </FieldContent>
+        </>
+    )
+}
+
+
+function ResetField(props: { resetAllSettings: () => void }) {
+    const { resetAllSettings } = props
+    return (
+        <>
+            <FieldLabel htmlFor="name">重置设置</FieldLabel>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button
+                        type="button"
+                        variant="destructive"
+                    >
+                        重置设置
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>你确认要全部重置吗？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            该操作会重置您的设置，但会保留您的历史数据。
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction onClick={resetAllSettings}>确定</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
+    )
+
 }
