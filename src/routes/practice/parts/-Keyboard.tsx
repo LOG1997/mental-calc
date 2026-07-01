@@ -100,7 +100,7 @@ const Numpad: React.FC<NumpadProps> = ({
     const rows = customRows || getDefaultRows(decimal);
 
     return (
-        <div className="w-full  max-w-md mx-auto bg-gray-100 rounded-2xl shadow-lg p-3 select-none touch-none">
+        <div className="w-full max-w-md mx-auto bg-background rounded-2xl shadow-lg p-3 select-none touch-none">
             {/* 键盘网格 */}
             <div className="grid grid-cols-3 gap-2">
                 {rows.map((row, rowIndex) =>
@@ -116,19 +116,19 @@ const Numpad: React.FC<NumpadProps> = ({
                         let label: string = key;
 
                         if (key === 'backspace') {
-                            btnClass += 'bg-amber-400 text-gray-700 active:bg-gray-300';
+                            btnClass += 'bg-amber-400 text-foreground/70 active:bg-gray-300';
                             label = '⌫';
                         } else if (key === 'clear') {
                             btnClass += 'bg-red-200 text-red-700 active:bg-red-300 col-span-1';
                             label = '清除';
                         } else if (key === 'confirm') {
-                            btnClass += 'bg-blue-500 text-white active:bg-blue-600 col-span-1';
+                            btnClass += 'bg-blue-500 text-foreground/60 active:bg-blue-600 col-span-1';
                             label = '✓';
                         } else if (key === '.') {
-                            btnClass += 'bg-gray-200 text-gray-700 active:bg-gray-300';
+                            btnClass += 'bg-fuchsia-200 text-foreground/70 active:bg-gray-300';
                         } else {
                             // 数字或其他字符
-                            btnClass += 'bg-white text-gray-800 active:bg-gray-200 shadow-sm';
+                            btnClass += 'bg-background/80 text-foreground/50 active:bg-gray-200 shadow-sm shadow-foreground/10';
                         }
 
                         const handleClick = (): void => {
