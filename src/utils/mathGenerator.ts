@@ -480,13 +480,19 @@ function generateMultiFormula(count: number, seed: any): Question[] {
     // 1. 解析 seed 配置
     const isSmallEnabled = seed?.smallMulti?.enable ?? true;
     const isBigEnabled = seed?.bigMulti?.enable ?? true;
+    const isSquareEnabled = seed?.square?.enable ?? true;
 
     // 2. 确定激活的模式
     // 规则：如果都为 false 或都为 true，则全部开启（混合模式）
     let useSmall = false;
     let useBig = false;
-
-    if (isSmallEnabled === isBigEnabled) {
+    let useSquare = false;
+    if (isSquareEnabled) {
+        useSquare = true;
+        useSmall = false;
+        useBig = false;
+    }
+    else if (isSmallEnabled === isBigEnabled) {
         // 同真或同假 -> 全部开启
         useSmall = true;
         useBig = true;
@@ -505,8 +511,11 @@ function generateMultiFormula(count: number, seed: any): Question[] {
         attempts++;
 
         // 随机决定当前题目类型（如果两种都启用）
-        let currentType: 'small' | 'big' = 'small';
-        if (useSmall && useBig) {
+        let currentType: 'small' | 'big' | 'square' = 'small';
+        if (useSquare) {
+            currentType = 'square';
+        }
+        else if (useSmall && useBig) {
             currentType = Math.random() < 0.5 ? 'small' : 'big';
         } else if (useBig) {
             currentType = 'big';
@@ -516,8 +525,12 @@ function generateMultiFormula(count: number, seed: any): Question[] {
 
         let a = 0;
         let b = 0;
-
-        if (currentType === 'small') {
+        if (currentType === 'square') {
+            // 乘法表：1 ~ 10
+            a = randInt(11, 50);
+            b = a
+        }
+        else if (currentType === 'small') {
             // 小九九：1 ~ 9
             a = randInt(1, 9);
             b = randInt(1, 9);

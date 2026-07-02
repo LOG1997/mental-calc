@@ -12,6 +12,10 @@ interface MultiFormulaStore {
             enable: boolean;
             desc: string;
         };
+        square: {
+            enable: boolean;
+            desc: string;
+        }
     };
     setConfig: (info: MultiFormulaStore['config']) => void;
     clearConfig: () => void;
@@ -26,6 +30,10 @@ const initialState: any = {
         enable: true,
         desc: '大九九乘法',
     },
+    square: {
+        enable: false,
+        desc: '平方',
+    }
 };
 
 // 2. 创建持久化 Store
