@@ -34,8 +34,10 @@ export const MODULE_LABELS: Record<ModuleType, { name: string; value: ModuleType
         name: '加减法末位判断',
         value: 'add_sub_last_digit',
     },
-    // 
-
+    multi_formula: {
+        name: '乘法口诀',
+        value: 'multi_formula',
+    },
 }
 
 

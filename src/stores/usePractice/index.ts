@@ -2,6 +2,7 @@ import { MODULE_LABELS } from '@/constants/constant';
 import { useTwoDigitAddSubStore } from './useTwoDigitAddSub'
 import { useMakeHundredStore } from './useMakeHundred'
 import { useAddSubLastDigitStore } from './useAddSubLastDigit'
+import { useMultiFormulaStore } from './useMultiFormula'
 
 export const practiceStore = {
     // MODULE_LABELS中的key值对应store，不是value
@@ -13,4 +14,5 @@ export const practiceStore = {
     [MODULE_LABELS.multi_add.value]: useTwoDigitAddSubStore,
     [MODULE_LABELS.mixed_add_sub.value]: useTwoDigitAddSubStore,
     [MODULE_LABELS.add_sub_last_digit.value]: useAddSubLastDigitStore,
+    [MODULE_LABELS.multi_formula.value]: useMultiFormulaStore,
 }

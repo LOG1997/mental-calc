@@ -474,6 +474,89 @@ function generateAddSubLastDigit(count: number, seed: any): Question[] {
     return shuffle(questions);
 }
 
+
+/** 乘法表：区分小九九（9*9）和大九九（19*19） */
+function generateMultiFormula(count: number, seed: any): Question[] {
+    // 1. 解析 seed 配置
+    const isSmallEnabled = seed?.smallMulti?.enable ?? true;
+    const isBigEnabled = seed?.bigMulti?.enable ?? true;
+
+    // 2. 确定激活的模式
+    // 规则：如果都为 false 或都为 true，则全部开启（混合模式）
+    let useSmall = false;
+    let useBig = false;
+
+    if (isSmallEnabled === isBigEnabled) {
+        // 同真或同假 -> 全部开启
+        useSmall = true;
+        useBig = true;
+    } else {
+        // 一真一假 -> 按实际值
+        useSmall = isSmallEnabled;
+        useBig = isBigEnabled;
+    }
+
+    const set = new Set<string>();
+    const questions: Question[] = [];
+    let attempts = 0;
+    const maxAttempts = count * 50; // 安全上限，防止死循环
+
+    while (questions.length < count && attempts < maxAttempts) {
+        attempts++;
+
+        // 随机决定当前题目类型（如果两种都启用）
+        let currentType: 'small' | 'big' = 'small';
+        if (useSmall && useBig) {
+            currentType = Math.random() < 0.5 ? 'small' : 'big';
+        } else if (useBig) {
+            currentType = 'big';
+        } else {
+            currentType = 'small';
+        }
+
+        let a = 0;
+        let b = 0;
+
+        if (currentType === 'small') {
+            // 小九九：1 ~ 9
+            a = randInt(1, 9);
+            b = randInt(1, 9);
+        } else {
+            // 大九九：1 ~ 19
+            // 为了体现大九九的特点，通常至少有一个数在 10-19 之间，或者范围就是 1-19
+            // 这里采用 1-19 的全范围，这样包含了小九九，但既然有模式区分，
+            // 我们可以强制大九九模式下，至少有一个因子 >= 10，以区别于小九九
+            // 如果用户只选了大九九，他们可能想要练习 10-19 的乘法
+            do {
+                a = randInt(1, 19);
+                b = randInt(1, 19);
+            } while (a < 10 && b < 10); // 确保至少有一个数是两位数，否则就退化成了小九九
+        }
+
+        // 统一 key 格式，利用乘法交换律去重 (e.g., "3*5" and "5*3" are same)
+        const min = Math.min(a, b);
+        const max = Math.max(a, b);
+        const key = `${min}*${max}`;
+
+        if (set.has(key)) continue;
+        set.add(key);
+
+        const correctAnswer = a * b;
+        const text = `${a} × ${b} = ?`;
+
+        questions.push({
+            id: questions.length,
+            text: text,
+            correctAnswer: correctAnswer,
+            durationSeconds: 0,
+            startTimestamp: 0,
+            endTimestamp: 0,
+        });
+    }
+
+    return shuffle(questions);
+}
+
 // ======== 统一导出 ========
 
 const generators: Record<ModuleType, (count: number, seed: any) => Question[]> = {
@@ -485,6 +568,7 @@ const generators: Record<ModuleType, (count: number, seed: any) => Question[]> =
     multi_add: generateMultiAdd,
     mixed_add_sub: generateMixedAddSub,
     add_sub_last_digit: generateAddSubLastDigit,
+    multi_formula: generateMultiFormula,
 };
 
 export function generateQuestions(

@@ -16,7 +16,9 @@ export type ModuleType =
     | 'three_digit_mixed'
     | 'multi_add'
     | 'mixed_add_sub'
-    | 'add_sub_last_digit';
+    | 'add_sub_last_digit'
+    | 'multi_formula'
+// | 'multi_custom'
 
 export type QuestionCount = 10 | 15 | 20 | 30 | 50 | 100;
 
