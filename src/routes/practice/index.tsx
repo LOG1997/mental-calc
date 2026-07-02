@@ -56,8 +56,8 @@ function RouteComponent() {
                     {/* 模糊层 */}
                     {showBlur && (
                         <>
-                            <div className="pointer-events-none absolute inset-0 z-20 backdrop-blur-sm bg-white/30" />
-                            <div className="pointer-events-none absolute inset-0 z-20 opacity-50 bg-white" />
+                            <div className="pointer-events-none absolute inset-0 z-20 backdrop-blur-sm bg-background/30" />
+                            <div className="pointer-events-none absolute inset-0 z-20 opacity-50 bg-background" />
                         </>
                     )}
 
@@ -144,8 +144,8 @@ function RouteComponent() {
 
             {/* ======== 长按浮层 ======== */}
             {isWaiting && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                    <div className="w-80 rounded-lg bg-white p-8 shadow-xl">
+                <div className="fixed inset-0 flex items-center justify-center bg-background/40 z-50">
+                    <div className="w-80 rounded-lg bg-background p-8 shadow-xl">
                         <p className="mb-4 text-center text-lg font-medium">
                             长按
                             {

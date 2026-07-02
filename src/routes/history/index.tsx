@@ -107,7 +107,7 @@ function RouteComponent() {
                                             <td className="px-4 py-3 font-medium">
                                                 {MODULE_LABELS[r.module].name}
                                             </td>
-                                            <td className="px-4 py-3">{r.questionCount} 题</td>
+                                            <td className="px-4 py-3">{r.totalCount} 题</td>
                                             <td className="px-4 py-3">
                                                 <span
                                                     className={
